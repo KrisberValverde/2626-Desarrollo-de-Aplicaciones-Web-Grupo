@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 2. ACCESO AL DOM: Uso de getElementById para capturar los nodos de la interfaz
     const formProducto = document.getElementById('form-producto');
+    const inputNombre = document.getElementById('prod-nombre');
+    const selectCategoria = document.getElementById('prod-categoria');
+    const txtDescripcion = document.getElementById('prod-descripcion');
     const listaProductos = document.getElementById('lista-productos');
     const totalRegistros = document.getElementById('total-registros');
     const mensajeAlerta = document.getElementById('mensaje-alerta');
@@ -12,21 +15,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. EVENTOS DE FORMULARIO: Escuchar el evento 'submit' al enviar datos
     formProducto.addEventListener('submit', (event) => {
-        
+        const switchClasesValidacion = (elemento, esValido) => {
+            if (esValido) {
+                elemento.classList.remove('is-invalid');
+                elemento.classList.add('is-valid');
+            } else {
+                elemento.classList.remove('is-valid');
+                elemento.classList.add('is-invalid');
+            }
+        };
+
+        const resetearClasesValidacion = () => {
+            [inputNombre, selectCategoria, txtDescripcion].forEach(el => el.classList.remove('is-valid', 'is-invalid'));
+        };
+
+        const validarNombre = () => {
+            const valor = inputNombre.value.trim();
+            const esValido = valor !== '' && valor.length >= 4; // Mínimo 4 letras
+            switchClasesValidacion(inputNombre, esValido);
+            return esValido;
+        };
+
+        const validarCategoria = () => {
+            const esValido = selectCategoria.value !== '';
+            switchClasesValidacion(selectCategoria, esValido);
+            return esValido;
+        };
+
+        const validarDescripcion = () => {
+            const valor = txtDescripcion.value.trim();
+            const esValido = valor !== '' && valor.length >= 10; // Mínimo 10 letras
+            switchClasesValidacion(txtDescripcion, esValido);
+            return esValido;
+        };
+
+        // ASIGNACIÓN DE EVENTOS EN TIEMPO REAL
+        inputNombre.addEventListener('input', validarNombre);
+        inputNombre.addEventListener('blur', validarNombre);
+        selectCategoria.addEventListener('change', validarCategoria);
+        selectCategoria.addEventListener('blur', validarCategoria);
+        txtDescripcion.addEventListener('input', validarDescripcion);
+        txtDescripcion.addEventListener('blur', validarDescripcion);
+
         // Uso obligatorio de preventDefault() para detener la recarga de la página
         event.preventDefault();
 
-        // Obtención de valores y eliminación de espacios con .trim()
-        const nombre = document.getElementById('prod-nombre').value.trim();
-        const categoria = document.getElementById('prod-categoria').value;
-        const descripcion = document.getElementById('prod-descripcion').value.trim();
+        // Forzar la ejecución de todas las validaciones individuales
+        const esNombreValido = validarNombre();
+        const esCategoriaValida = validarCategoria();
+        const esDescripcionValida = validarDescripcion();
 
-        // 4. VALIDACIÓN DINÁMICA: Comprobar que los campos no se envíen vacíos
-        if (nombre === '' || categoria === '' || descripcion === '') {
-            mostrarMensaje('¡Error! Todos los campos de la prenda son obligatorios.', 'danger');
+        // Comprobar si alguna falló
+        if (!esNombreValido || !esCategoriaValida || !esDescripcionValida) {
+            mostrarMensaje('¡Error! Verifique los campos marcados en rojo antes de continuar.', 'danger');
             return; // Corta la ejecución del código
         }
 
+        // Obtención segura de valores para usarlos en tus tablas de abajo
+        const nombre = inputNombre.value.trim();
+        const categoria = selectCategoria.value;
+        const descripcion = txtDescripcion.value.trim();
         // 5. CREACIÓN DE ELEMENTOS (MANIPULACIÓN DEL DOM): Generar nodos dinámicos
         const fila = document.createElement('tr'); // Nodo contenedor principal
 
@@ -83,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Mostrar notificación de éxito y limpiar las casillas del formulario
         mostrarMensaje('¡Prenda agregada al inventario correctamente!', 'success');
         formProducto.reset();
+        resetearClasesValidacion();
     });
 
     // Función auxiliar para inyectar alertas dinámicas usando clases de Bootstrap

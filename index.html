@@ -82,29 +82,35 @@
                         
                         <div id="mensaje-alerta"></div>
                         
-                        <form id="form-producto">
-                            <div class="mb-3">
-                                <label for="prod-nombre" class="form-label small fw-bold">Nombre de la Prenda:</label>
-                                <input type="text" id="prod-nombre" class="form-control" placeholder="Ej. Vestido de Noche Negro">
-                            </div>
-                            <div class="mb-3">
-                                <label for="prod-categoria" class="form-label small fw-bold">Categoría:</label>
-                                <select id="prod-categoria" class="form-select">
-                                    <option value="">Seleccione una categoría...</option>
-                                    <option value="Vestidos">Vestidos</option>
-                                    <option value="Tops">Tops</option>
-                                    <option value="Pantalones">Pantalones</option>
-                                    <option value="Camisas">Camisas</option>
-                                    <option value="Enterizos">Enterizos</option>
-                                    <option value="Faldas">Faldas</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="prod-descripcion" class="form-label small fw-bold">Descripción / Detalles:</label>
-                                <textarea id="prod-descripcion" class="form-control" rows="2" placeholder="Tallas, color, tipo de tela..."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-secondary w-100 fw-bold">Agregar al Inventario</button>
-                        </form>
+                            <form id="form-producto" novalidate>
+                                <div class="mb-3">
+                                    <label for="prod-nombre" class="form-label small fw-bold">Nombre de la Prenda:</label>
+                                    <input type="text" id="prod-nombre" class="form-control" placeholder="Ej. Vestido de Noche Negro">
+                                    <!-- Div para error dinámico -->
+                                    <div class="invalid-feedback">Por favor, ingresa un nombre (mínimo 4 caracteres).</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="prod-categoria" class="form-label small fw-bold">Categoría:</label>
+                                    <select id="prod-categoria" class="form-select">
+                                        <option value="">Seleccione una categoría...</option>
+                                        <option value="Vestidos">Vestidos</option>
+                                        <option value="Tops">Tops</option>
+                                        <option value="Pantalones">Pantalones</option>
+                                        <option value="Camisas">Camisas</option>
+                                        <option value="Enterizos">Enterizos</option>
+                                        <option value="Faldas">Faldas</option>
+                                    </select>
+                                    <!-- Div para error dinámico -->
+                                    <div class="invalid-feedback">Debes seleccionar una categoría válida.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="prod-descripcion" class="form-label small fw-bold">Descripción / Detalles:</label>
+                                    <textarea id="prod-descripcion" class="form-control" rows="2" placeholder="Tallas, color, tipo de tela..."></textarea>
+                                    <!-- Div para error dinámico -->
+                                    <div class="invalid-feedback">La descripción debe contener información suficiente (mínimo 10 caracteres).</div>
+                                </div>
+                                <button type="submit" class="btn btn-secondary w-100 fw-bold">Agregar al Inventario</button>
+                            </form>
                     </div>
                 </div>
 

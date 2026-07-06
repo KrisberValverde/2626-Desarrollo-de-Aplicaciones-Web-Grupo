@@ -43,7 +43,7 @@ h3{
 .card:hover{
     transform: translateY(-5px);
     box-shadow: 0 6px 12px rgba(99, 95, 95, 0.15);
-    background-color: #f13392 !important;
+    background-color: #f588be !important;
 }
 
 .text-justify {
