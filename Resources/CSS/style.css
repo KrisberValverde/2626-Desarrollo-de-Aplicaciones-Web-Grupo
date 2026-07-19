@@ -96,3 +96,31 @@ h4{
         margin-bottom: 5px;
         }
 }
+/* Color de fondo para todo el cuadro del Modal */
+.modal-content {
+    background-color: #e6b9e9 !important;    /* Fondo rosa extremadamente claro */
+    border: 3px solid #cb6ae4 !important;    /* Borde morado */
+    border-radius: 0 !important;             /* Esquinas cuadradas */
+    color: #140f0f !important;               /* Texto en color oscuro para máxima legibilidad */
+}
+.modal-header {
+    background-color: #cb6ae4 !important;    
+    color: white !important;                 
+    border-bottom: 2px solid #cb6ae4 !important; 
+}
+/* Pie del modal */
+.modal-footer {
+    border: none !important;                 
+}
+.btn-instagram {
+    background-color: #e4405f !important;
+}
+
+.btn-facebook {
+    background-color: #1877f2 !important;
+}
+
+.btn {
+    border-radius: 0 !important; 
+    font-weight: bold;
+}

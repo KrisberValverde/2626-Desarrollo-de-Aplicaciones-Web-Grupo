@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. EVENTOS DE FORMULARIO: Escuchar el evento 'submit' al enviar datos
     formProducto.addEventListener('submit', (event) => {
+        event.preventDefault(); // Detener la recarga de la página
+
         const switchClasesValidacion = (elemento, esValido) => {
             if (esValido) {
                 elemento.classList.remove('is-invalid');
@@ -31,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const validarNombre = () => {
             const valor = inputNombre.value.trim();
-            const esValido = valor !== '' && valor.length >= 4; // Mínimo 4 letras
+            const esValido = valor !== '' && valor.length >= 4;
             switchClasesValidacion(inputNombre, esValido);
             return esValido;
         };
@@ -44,97 +46,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const validarDescripcion = () => {
             const valor = txtDescripcion.value.trim();
-            const esValido = valor !== '' && valor.length >= 10; // Mínimo 10 letras
+            const esValido = valor !== '' && valor.length >= 10;
             switchClasesValidacion(txtDescripcion, esValido);
             return esValido;
         };
 
-        // ASIGNACIÓN DE EVENTOS EN TIEMPO REAL
-        inputNombre.addEventListener('input', validarNombre);
-        inputNombre.addEventListener('blur', validarNombre);
-        selectCategoria.addEventListener('change', validarCategoria);
-        selectCategoria.addEventListener('blur', validarCategoria);
-        txtDescripcion.addEventListener('input', validarDescripcion);
-        txtDescripcion.addEventListener('blur', validarDescripcion);
-
-        // Uso obligatorio de preventDefault() para detener la recarga de la página
-        event.preventDefault();
-
-        // Forzar la ejecución de todas las validaciones individuales
-        const esNombreValido = validarNombre();
-        const esCategoriaValida = validarCategoria();
-        const esDescripcionValida = validarDescripcion();
-
-        // Comprobar si alguna falló
-        if (!esNombreValido || !esCategoriaValida || !esDescripcionValida) {
+        // Forzar la ejecución de todas las validaciones
+        if (!validarNombre() || !validarCategoria() || !validarDescripcion()) {
             mostrarMensaje('¡Error! Verifique los campos marcados en rojo antes de continuar.', 'danger');
-            return; // Corta la ejecución del código
+            return;
         }
 
-        // Obtención segura de valores para usarlos en tus tablas de abajo
-        const nombre = inputNombre.value.trim();
-        const categoria = selectCategoria.value;
-        const descripcion = txtDescripcion.value.trim();
-        // 5. CREACIÓN DE ELEMENTOS (MANIPULACIÓN DEL DOM): Generar nodos dinámicos
-        const fila = document.createElement('tr'); // Nodo contenedor principal
+        // --- NUEVA LÓGICA: MODAL DE CONFIRMACIÓN ---
+        const modal = new bootstrap.Modal(document.getElementById('modalConfirmacion'));
+        modal.show();
 
-        // Columna Nombre
-        const colNombre = document.createElement('td');
-        colNombre.className = 'fw-bold text-dark';
-        colNombre.textContent = nombre;
+        // 4. EVENTO DEL MODAL: Solo se ejecuta al confirmar
+        document.getElementById('btn-confirmar-add').onclick = () => {
+            modal.hide();
+            const spinner = document.getElementById('spinner-carga');
+            spinner.style.display = 'block';
 
-        // Columna Categoría (Aplica badges dinámicos de Bootstrap)
-        const colCategoria = document.createElement('td');
-        colCategoria.innerHTML = `<span class="badge bg-secondary">${categoria}</span>`;
+            // Simulación de carga
+            setTimeout(() => {
+                spinner.style.display = 'none';
 
-        // Columna Descripción
-        const colDescripcion = document.createElement('td');
-        colDescripcion.className = 'text-muted small';
-        colDescripcion.textContent = descripcion;
+                // 5. CREACIÓN DE ELEMENTOS (MANIPULACIÓN DEL DOM): Generar nodos dinámicos
+                const nombre = inputNombre.value.trim();
+                const categoria = selectCategoria.value;
+                const descripcion = txtDescripcion.value.trim();
 
-        // Columna de Acción (Para el botón de remoción)
-        const colAccion = document.createElement('td');
-        colAccion.className = 'text-center';
+                const fila = document.createElement('tr'); 
+                fila.innerHTML = `
+                    <td class="fw-bold text-dark">${nombre}</td>
+                    <td><span class="badge bg-secondary">${categoria}</span></td>
+                    <td class="text-muted small">${descripcion}</td>
+                    <td class="text-center"><button class="btn btn-outline-danger btn-sm fw-bold">Eliminar</button></td>
+                `;
 
-        // Creación del Botón de Eliminar
-        const botonEliminar = document.createElement('button');
-        botonEliminar.className = 'btn btn-outline-danger btn-sm fw-bold';
-        botonEliminar.textContent = 'Eliminar';
+                // 6. EVENTOS DEL MOUSE: Manejo del evento 'click' para remover elementos
+                fila.querySelector('button').addEventListener('click', () => {
+                    fila.remove();
+                    contadorPrendas--;
+                    totalRegistros.textContent = contadorPrendas;
+                    mostrarMensaje('Prenda eliminada del catálogo.', 'warning');
+                });
 
-        // 6. EVENTOS DEL MOUSE: Manejo del evento 'click' para remover elementos de la lista
-        botonEliminar.addEventListener('click', () => {
-            // Remueve la fila correspondiente del árbol DOM
-            fila.remove();
-            
-            // Decrementar el contador general y actualizar la UI
-            contadorPrendas--;
-            totalRegistros.textContent = contadorPrendas;
-            
-            mostrarMensaje('Prenda eliminada del catálogo.', 'warning');
-        });
+                // 7. ENSAMBLAJE DE NODOS CON APPENDCHILD
+                listaProductos.appendChild(fila);
 
-        // 7. ENSAMBLAJE DE NODOS CON APPENDCHILD: Estructurar la tabla jerárquicamente
-        colAccion.appendChild(botonEliminar);
-        
-        fila.appendChild(colNombre);
-        fila.appendChild(colCategoria);
-        fila.appendChild(colDescripcion);
-        fila.appendChild(colAccion);
+                // 8. CONTADOR DE REGISTROS: Incrementar el total
+                contadorPrendas++;
+                totalRegistros.textContent = contadorPrendas;
 
-        // Insertar la fila completa dentro del cuerpo de la tabla (tbody)
-        listaProductos.appendChild(fila);
-
-        // 8. CONTADOR DE REGISTROS: Incrementar el total de elementos activos
-        contadorPrendas++;
-        totalRegistros.textContent = contadorPrendas;
-
-        // Mostrar notificación de éxito y limpiar las casillas del formulario
-        mostrarMensaje('¡Prenda agregada al inventario correctamente!', 'success');
-        formProducto.reset();
-        resetearClasesValidacion();
+                mostrarMensaje('¡Prenda agregada al inventario correctamente!', 'success');
+                formProducto.reset();
+                resetearClasesValidacion();
+            }, 1500);
+        };
     });
 
-    // Función auxiliar para inyectar alertas dinámicas usando clases de Bootstrap
+    // Función auxiliar para inyectar alertas dinámicas
     function mostrarMensaje(texto, tipo) {
         mensajeAlerta.innerHTML = `
             <div class="alert alert-${tipo} alert-dismissible fade show p-2 small" role="alert">
@@ -142,13 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button type="button" class="btn-close p-2" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         `;
-
-        // Eliminación programada del nodo de alerta tras 4 segundos
         setTimeout(() => {
             const alertaActiva = document.querySelector('#mensaje-alerta .alert');
-            if (alertaActiva) {
-                alertaActiva.remove();
-            }
+            if (alertaActiva) alertaActiva.remove();
         }, 4000);
     }
 });

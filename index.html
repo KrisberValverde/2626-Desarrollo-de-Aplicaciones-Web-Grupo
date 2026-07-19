@@ -13,7 +13,7 @@
     <header class="text-center bg p-4 shadow-sm">
         <h1> Boutique online "Alison" </h1>
     </header>
-   
+    
     <nav class="navbar navbar-expand-md bg-c shadow-sm sticky-top">
         <div class="container">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuBoutique">
@@ -165,10 +165,10 @@
                     <p>Dirección: Calle Amazonas, Lago Agrio, Ecuador</p>
                     <p>Teléfono: +593 0990213572</p>
                     <p>Redes Sociales:</p>
-                    <ul>
-                        <li><a href="https://www.instagram.com/allisonboutique1?igsh=MXJtazBha2tsbjRkbw==" target="_blank">Instagram</a></li>
-                        <li><a href="https://www.facebook.com/365005253677989?ref=NONE_xav_ig_profile_page_web" target="_blank">Facebook</a></li>
-                    </ul>
+                    <div class="d-grid gap-2">
+                        <a href="https://www.instagram.com/allisonboutique1?igsh=MXJtazBha2tsbjRkbw==" class="btn btn-instagram text-white" target="_blank">Instagram</a>
+                        <a href="https://www.facebook.com/365005253677989?ref=NONE_xav_ig_profile_page_web" class="btn btn-facebook text-white" target="_blank">Facebook</a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -183,6 +183,32 @@
                 </iframe>
             </div>
         </section>
+
+        <!-- BLOQUE AÑADIDO: SPINNER -->
+        <div id="spinner-carga" class="text-center my-3" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+
+        <!-- BLOQUE AÑADIDO: MODAL -->
+        <div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirmar acción</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ¿Está seguro que desea agregar esta prenda al inventario?
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn bg text-white" id="btn-confirmar-add">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </main>
 
