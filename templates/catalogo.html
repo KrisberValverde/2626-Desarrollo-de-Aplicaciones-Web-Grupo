@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo de Prendas - Boutique Alison{% endblock %}
+
+{% block content %}
+    <!-- Banner de encabezado propio del catálogo -->
+    <section class="bg-gris p-4 rounded shadow-sm my-3 text-center">
+        <h2>Nuestro Catálogo Exclusivo</h2>
+        <p class="lead mb-0">Explora nuestras últimas tendencias y encuentra el outfit perfecto para ti.</p>
+    </section>
+
+    <!-- Sección preparada para las tarjetas con imágenes y precios -->
+    <section class="bg-gris p-4 rounded shadow-sm my-3">
+        <h3 class="mb-4">Colección Destacada</h3>
+        
+        <!-- Cuadrícula de Bootstrap (Grid) -->
+        <div class="row g-4">
+            
+            <!-- Tarjeta de producto modelo (Duplica este div para más prendas) -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="bg-light text-center py-5 rounded-top" style="min-height: 200px;">
+                        <span class="text-muted">Espacio para Imagen</span>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-between text-center">
+                        <div>
+                            <h5 class="card-title fw-bold">Nombre de la Prenda</h5>
+                            <p class="card-text text-muted small">Categoría / Descripción</p>
+                        </div>
+                        <div class="mt-3">
+                            <span class="fs-5 fw-bold text-danger">$00.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+{% endblock %}
