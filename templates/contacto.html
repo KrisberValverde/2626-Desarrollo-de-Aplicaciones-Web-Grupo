@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - Boutique Alison{% endblock %}
+
+{% block content %}
+<section class="bg-gris p-4 rounded shadow-sm my-3">
+    <div class="row">
+        <!-- Formulario -->
+        <div class="col-md-6 p-3">
+            <h3 class="mb-3">Envíanos un mensaje</h3>
+            <form action="{{ url_for('procesar') }}" method="POST">
+                <div class="mb-3">
+                    <label for="nombre" class="form-label fw-bold">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Tu nombre" required>
+                </div>
+                <div class="mb-3">
+                    <label for="correo" class="form-label fw-bold">Correo electrónico:</label>
+                    <input type="email" id="correo" name="correo" class="form-control" placeholder="nombre@correo.com" required>
+                </div>
+                <div class="mb-3">
+                    <label for="mensaje" class="form-label fw-bold">Mensaje:</label>
+                    <textarea id="mensaje" name="mensaje" class="form-control" rows="4" placeholder="Escribe tu mensaje aquí..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-secondary w-100 fw-bold">Enviar Mensaje</button>
+            </form>
+        </div>
+
+        <!-- Información de contacto -->
+        <div class="col-md-6 p-3">
+            <h2>Contacto</h2>
+            <p><strong>Correo electrónico:</strong> <a href="mailto:user.20061507@gmail.com">user.20061507@gmail.com</a></p>  
+            <p><strong>Dirección:</strong> Calle Amazonas, Lago Agrio, Ecuador</p>
+            <p><strong>Teléfono:</strong> +593 0990213572</p>
+            <p><strong>Redes Sociales:</strong></p>
+            <div class="d-grid gap-2">
+                <a href="https://www.instagram.com/allisonboutique1?igsh=MXJtazBha2tsbjRkbw==" class="btn btn-instagram text-white" target="_blank">Instagram</a>
+                <a href="https://www.facebook.com/365005253677989?ref=NONE_xav_ig_profile_page_web" class="btn btn-facebook text-white" target="_blank">Facebook</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

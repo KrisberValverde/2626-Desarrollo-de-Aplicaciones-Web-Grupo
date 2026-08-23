@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - Boutique Alison{% endblock %}
+
+{% block content %}
+<section class="bg-gris p-5 rounded shadow-sm text-center my-4">
+    <h2 class="text-success fw-bold mb-3">¡Mensaje Recibido!</h2>
+    <p class="lead">Gracias por contactarnos, <strong>{{ nombre }}</strong>.</p>
+    <p>Hemos recibido tu consulta y te responderemos al correo <strong>{{ correo }}</strong> lo antes posible.</p>
+    
+    <div class="card mx-auto my-4 p-3 bg-light text-start shadow-sm" style="max-width: 500px;">
+        <h5 class="fw-bold border-bottom pb-2">Resumen de tu mensaje:</h5>
+        <p class="mb-0 text-muted">"{{ mensaje }}"</p>
+    </div>
+
+    <a href="{{ url_for('index') }}" class="btn btn-outline-dark fw-bold px-4">Volver al Inicio</a>
+</section>
+{% endblock %}

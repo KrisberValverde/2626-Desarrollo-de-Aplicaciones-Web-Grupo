@@ -1,0 +1,23 @@
+<nav class="navbar navbar-expand-md bg-c shadow-sm sticky-top">
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuBoutique">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-center" id="menuBoutique">
+            <ul class="navbar-nav gap-3">
+                <li class="nav-item">
+                    <a class="nav-link text-dark fw-semibold" href="{{ url_for('index') }}">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="{{ url_for('index') }}#quienes-somos">Quiénes Somos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="{{ url_for('catalogo') }}">Productos o Servicios</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="{{ url_for('contacto') }}">Contacto</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
