@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h2>Facturación</h2>
+    <a href="{{ url_for('nueva_factura') }}" class="btn btn-success mb-3">+ Nueva Factura</a>
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% if facturas %}
+    <table class="table table-striped">
+        <tr><th>ID</th><th>Cliente</th><th>Prenda ID</th><th>Cantidad</th></th>Descuento</th></tr>
+        {% for factura in facturas %}
+        <tr><td>{{ factura.id }}</td><td>{{ factura.cliente }}</td><td>{{ factura.producto_id }}</td><td>${{ factura.cantidad }}</td></th>{{ factura.descuento }}%</th></tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No hay facturas registradas.</p>
+    {% endif %}
+</div>
+{% endblock %}

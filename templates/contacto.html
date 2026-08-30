@@ -1,27 +1,31 @@
 {% extends "base.html" %}
 
-{% block title %}{{ titulo }} - Boutique Alison{% endblock %}
-
 {% block content %}
 <section class="bg-gris p-4 rounded shadow-sm my-3">
     <div class="row">
         <!-- Formulario -->
         <div class="col-md-6 p-3">
             <h3 class="mb-3">Envíanos un mensaje</h3>
-            <form action="{{ url_for('procesar') }}" method="POST">
+            <form action="{{ url_for('contacto') }}" method="POST" novalidate>
+                {{ form.hidden_tag() }} 
+            
                 <div class="mb-3">
-                    <label for="nombre" class="form-label fw-bold">Nombre:</label>
-                    <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Tu nombre" required>
+                    {{ form.nombre.label(class="form-label fw-bold") }}
+                    {{ form.nombre(class="form-control" + (" is-invalid" if form.nombre.errors else ""), placeholder="Tu nombre") }}
+                    {% for e in form.nombre.errors %}<div class="invalid-feedback d-block text-danger">{{ e }}</div>{% endfor %}
                 </div>
                 <div class="mb-3">
-                    <label for="correo" class="form-label fw-bold">Correo electrónico:</label>
-                    <input type="email" id="correo" name="correo" class="form-control" placeholder="nombre@correo.com" required>
+                    {{ form.correo.label(class="form-label fw-bold") }}
+                    {{ form.correo(class="form-control" + (" is-invalid" if form.correo.errors else ""), placeholder="nombre@correo.com") }}
+                    {% for e in form.correo.errors %}<div class="invalid-feedback d-block text-danger">{{ e }}</div>{% endfor %}
                 </div>
                 <div class="mb-3">
-                    <label for="mensaje" class="form-label fw-bold">Mensaje:</label>
-                    <textarea id="mensaje" name="mensaje" class="form-control" rows="4" placeholder="Escribe tu mensaje aquí..." required></textarea>
+                    {{ form.mensaje.label(class="form-label fw-bold") }}
+                    {{ form.mensaje(class="form-control" + (" is-invalid" if form.mensaje.errors else ""), rows="4", placeholder="Escribe tu mensaje aquí...") }}
+                    {% for e in form.mensaje.errors %}<div class="invalid-feedback d-block text-danger">{{ e }}</div>{% endfor %}
                 </div>
-                <button type="submit" class="btn btn-secondary w-100 fw-bold">Enviar Mensaje</button>
+                
+                {{ form.submit(class="btn btn-secondary w-100 fw-bold") }}
             </form>
         </div>
 

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container col-md-8">
+    <h2>{{ titulo }}</h2>
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        {% for f in [form.nombre, form.ruc, form.telefono, form.direccion] %}
+        <div class="mb-3">
+            {{ f.label(class="form-label") }}
+            {{ f(class="form-control" + (" is-invalid" if f.errors else "")) }}
+            {% for e in f.errors %}</div> class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+        </div>
+        {% endfor %}
+        {{ form.submit(class="btn btn-primary") }}
+        <a href="{{ url_for('proveedores_list') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

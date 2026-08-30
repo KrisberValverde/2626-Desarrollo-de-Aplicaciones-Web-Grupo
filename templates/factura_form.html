@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container col-md-8">
+    <h2>{{ titulo }}</h2>
+    <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+    <div class="mb-4">
+        {{ form.cliente.label(class="form-label") }}
+        {{ form.cliente(class="form-control" + (" is-invalid" if form.cliente.errors else "")) }}
+        {% for e in form.cliente.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="mb-3">
+        {{ form.producto_id.label(class="form-label") }}
+        {{ form.producto_id(class="form-select" + (" is-invalid" if form.producto_id.errors else "")) }}
+        {% for e in form.producto_id.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="mb-3">
+        {{ form.cantidad.label(class="form-label") }}
+        {{ form.cantidad(class="form-control" + (" is-invalid" if form.cantidad.errors else "")) }}
+        {% for e in form.cantidad.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="mb-3">
+        {{ form.descuento.label(class="form-label") }}
+        {{ form.descuento(class="form-control" + (" is-invalid" if form.descuento.errors else "")) }}
+        {% for e in form.descuento.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+    <a href="{{ url_for('facturacion') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
