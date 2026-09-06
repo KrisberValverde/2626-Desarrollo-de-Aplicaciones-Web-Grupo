@@ -1,4 +1,5 @@
-# Importar Flask, render_template y request
+# Importar SQLite y las funciones necesarias de Flask
+import sqlite3
 from flask import Flask, render_template, redirect, url_for, flash
 from forms import ProductoForm, ClienteForm, ContactoForm, ProveedorForm, FacturaForm
 
@@ -6,103 +7,334 @@ from forms import ProductoForm, ClienteForm, ContactoForm, ProveedorForm, Factur
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'boutique_alison-2026-csrf-segura'
 
-# Datos temporales
-prendas = [
-        {"id": 1, "nombre": "Vestido Elegante de Noche", "precio": 45.00, "categoria": "Ropa", "stock": 5, "imagen": "vestido.jpeg"},
-        {"id": 2, "nombre": "Blusa Casual Primavera", "precio": 22.50, "categoria": "Ropa", "stock": 12, "imagen": "blusa.png"},
-        {"id": 3, "nombre": "Jeans Tiro Alto Classic", "precio": 35.00, "categoria": "Ropa", "stock": 0, "imagen": "jeans.png"},
-        {"id": 4, "nombre": "Chaqueta de Cuero Sintético", "precio": 60.00, "categoria": "Abrigos", "stock": 3, "imagen": "chaqueta.png"}
-    ]
+
+# Configuración de SQLite para la persistencia local
+def get_db_connection():
+    # Conexión con la base de datos SQLite
+    conn = sqlite3.connect('data/boutique_alison.db')
+
+    # Permite acceder a las columnas por nombre
+    conn.row_factory = sqlite3.Row
+
+    return conn
+
+
+# Inicialización de la base de datos
+def init_db():
+    # Obtener conexión con SQLite
+    conn = get_db_connection()
+
+    # Crear la tabla productos si todavía no existe
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS productos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL,
+            precio REAL NOT NULL,
+            categoria TEXT NOT NULL,
+            stock INTEGER NOT NULL,
+            imagen TEXT NOT NULL
+        )
+    ''')
+
+    # Guardar los cambios realizados en la base de datos
+    conn.commit()
+
+    # Cerrar la conexión
+    conn.close()
+
+
+# Ejecutar la inicialización de la base de datos
+init_db()
+
+
+# Datos temporales para los demás módulos
+# Estos módulos se mantendrán y posteriormente podrán integrarse con SQLite
 proveedores = []
 facturas = []
 mensajes_contacto = []
 
-# Ruta principal (Se envían variables simples y listas)
+
+# Ruta principal
 @app.route('/')
 def index():
+    # Nombre de la tienda
     tienda_nombre = "boutique alison"
-    # Cambiamos los elementos de la lista enviada al template
-    categorias = ["Vestidos", "Tops", "Pantalones", "Camisas", "Enterizos", "Faldas"]
-    return render_template('index.html', titulo="Inicio", tienda=tienda_nombre, categorias=categorias)
 
-# Ruta del catálogo (Se envía la lista de diccionarios con stock e imagen)
+    # Lista de categorías que se enviará a la plantilla
+    categorias = [
+        "Vestidos",
+        "Tops",
+        "Pantalones",
+        "Camisas",
+        "Enterizos",
+        "Faldas"
+    ]
+
+    # Enviar información a la plantilla index.html
+    return render_template(
+        'index.html',
+        titulo="Inicio",
+        tienda=tienda_nombre,
+        categorias=categorias
+    )
+
+
+# Ruta del catálogo
+# Los productos ahora se consultan desde la base de datos SQLite
 @app.route('/catalogo')
 def catalogo():
-    return render_template('catalogo.html', titulo="Catálogo", prendas=prendas)
 
+    # Abrir conexión con SQLite
+    conn = get_db_connection()
+
+    # Consultar todos los productos almacenados
+    prendas = conn.execute(
+        'SELECT * FROM productos'
+    ).fetchall()
+
+    # Cerrar la conexión
+    conn.close()
+
+    # Enviar los productos consultados a la plantilla
+    return render_template(
+        'catalogo.html',
+        titulo="Catálogo",
+        prendas=prendas
+    )
+
+
+# Ruta para registrar un nuevo producto
+# Se utilizan los métodos GET y POST
 @app.route('/catalogo/nuevo', methods=['GET', 'POST'])
 def nuevo_producto():
-    form = ProductoForm()
-    if form.validate_on_submit():
-        prendas.append({  # ERROR CORREGIDO: era predas
-            "id": len(prendas)+1,
-            "nombre": form.nombre.data,
-            "precio": form.precio.data,
-            "categoria": form.categoria.data,
-            "stock": form.stock.data,
-            "imagen": form.imagen.data
-        })
-        flash('Prenda registrada correctamente', 'success')
-        return redirect(url_for('catalogo'))
-    return render_template('producto_form.html', titulo="Nueva Prenda", form=form)
 
-# Ruta para mostrar el formulario 
-@app.route('/contacto', methods=['GET', 'POST']) # ERROR CORREGIDO: era [GET, 'POST'] sin comillas
-def contacto():
-    form = ContactoForm()
+    # Crear una instancia del formulario de productos
+    form = ProductoForm()
+
+    # Validar el formulario antes de guardar los datos
     if form.validate_on_submit():
-        mensajes_contacto.append({ # ERROR CORREGIDO: era [ ] debe ser { }
+
+        # Abrir conexión con SQLite
+        conn = get_db_connection()
+
+        # Insertar el producto validado en la base de datos
+        # Se utilizan parámetros ? para evitar concatenar directamente los datos
+        conn.execute('''
+            INSERT INTO productos (
+                nombre,
+                precio,
+                categoria,
+                stock,
+                imagen
+            )
+            VALUES (?, ?, ?, ?, ?)
+        ''', (
+            form.nombre.data,
+            form.precio.data,
+            form.categoria.data,
+            form.stock.data,
+            form.imagen.data
+        ))
+
+        # Confirmar y guardar el registro en SQLite
+        conn.commit()
+
+        # Cerrar la conexión con la base de datos
+        conn.close()
+
+        # Mostrar mensaje de confirmación
+        flash(
+            'Prenda registrada correctamente en la base de datos',
+            'success'
+        )
+
+        # Regresar al catálogo
+        return redirect(url_for('catalogo'))
+
+    # Mostrar el formulario si todavía no ha sido enviado o no es válido
+    return render_template(
+        'producto_form.html',
+        titulo="Nueva Prenda",
+        form=form
+    )
+
+
+# Ruta para mostrar y procesar el formulario de contacto
+@app.route('/contacto', methods=['GET', 'POST'])
+def contacto():
+
+    # Crear una instancia del formulario de contacto
+    form = ContactoForm()
+
+    # Validar el formulario
+    if form.validate_on_submit():
+
+        # Guardar temporalmente el mensaje de contacto
+        mensajes_contacto.append({
             "nombre": form.nombre.data,
             "correo": form.correo.data,
             "mensaje": form.mensaje.data
         })
-        flash('Mensaje enviado correctamente', 'success')
-        return render_template('respuesta.html', titulo="Confirmación", nombre=form.nombre.data, correo=form.correo.data, mensaje=form.mensaje.data)
-    return render_template('contacto.html', titulo="Contacto", form=form)
 
-@app.route('/proveedores') # ERROR CORREGIDO: era /proveedor singular, ahora plural
+        # Mostrar mensaje de confirmación
+        flash(
+            'Mensaje enviado correctamente',
+            'success'
+        )
+
+        # Mostrar la página de respuesta
+        return render_template(
+            'respuesta.html',
+            titulo="Confirmación",
+            nombre=form.nombre.data,
+            correo=form.correo.data,
+            mensaje=form.mensaje.data
+        )
+
+    # Mostrar el formulario de contacto
+    return render_template(
+        'contacto.html',
+        titulo="Contacto",
+        form=form
+    )
+
+
+# Ruta para mostrar los proveedores
+@app.route('/proveedores')
 def proveedores_list():
-    return render_template('proveedores.html', titulo="Proveedores", proveedores=proveedores)
 
+    # Enviar la lista de proveedores a la plantilla
+    return render_template(
+        'proveedores.html',
+        titulo="Proveedores",
+        proveedores=proveedores
+    )
+
+
+# Ruta para registrar un nuevo proveedor
 @app.route('/proveedores/nuevo', methods=['GET', 'POST'])
-def nuevo_proveedor(): # ERROR CORREGIDO: era nuevo_proveedo
+def nuevo_proveedor():
+
+    # Crear una instancia del formulario de proveedores
     form = ProveedorForm()
+
+    # Validar el formulario
     if form.validate_on_submit():
-        proveedores.append({ # ERROR CORREGIDO: era [ ] debe ser { }
-            "id": len(proveedores)+1,
+
+        # Guardar temporalmente los datos del proveedor
+        proveedores.append({
+            "id": len(proveedores) + 1,
             "nombre_empresa": form.nombre_empresa.data,
             "ruc": form.ruc.data,
             "email": form.email.data,
             "telefono": form.telefono.data
         })
-        flash('Proveedor registrado', 'success')
-        return redirect(url_for('proveedores_list'))
-    return render_template('proveedor_form.html', titulo="Nuevo Proveedor", form=form)
 
+        # Mostrar mensaje de confirmación
+        flash(
+            'Proveedor registrado',
+            'success'
+        )
+
+        # Regresar a la lista de proveedores
+        return redirect(
+            url_for('proveedores_list')
+        )
+
+    # Mostrar el formulario de proveedores
+    return render_template(
+        'proveedor_form.html',
+        titulo="Nuevo Proveedor",
+        form=form
+    )
+
+
+# Ruta para mostrar el módulo de facturación
 @app.route('/facturacion')
 def facturacion():
-    return render_template('facturacion.html', titulo="Facturación", facturas=facturas, prendas=prendas)
 
-@app.route('/facturacion/nuevo', methods=['GET', 'POST']) # ERROR CORREGIDO: faltaba methods
+    # Abrir conexión con SQLite
+    conn = get_db_connection()
+
+    # Consultar los productos disponibles para la facturación
+    prendas = conn.execute(
+        'SELECT * FROM productos'
+    ).fetchall()
+
+    # Cerrar conexión
+    conn.close()
+
+    # Enviar los datos a la plantilla
+    return render_template(
+        'facturacion.html',
+        titulo="Facturación",
+        facturas=facturas,
+        prendas=prendas
+    )
+
+
+# Ruta para crear una nueva factura
+@app.route('/facturacion/nuevo', methods=['GET', 'POST'])
 def nueva_factura():
+
+    # Consultar los productos almacenados en SQLite
+    conn = get_db_connection()
+
+    prendas = conn.execute(
+        'SELECT * FROM productos'
+    ).fetchall()
+
+    # Cerrar conexión
+    conn.close()
+
+    # Crear una instancia del formulario de facturación
     form = FacturaForm()
-    form.producto_id.choices = [(p['id'], p['nombre']) for p in prendas]
+
+    # Cargar los productos disponibles en el campo de selección
+    form.producto_id.choices = [
+        (p['id'], p['nombre'])
+        for p in prendas
+    ]
+
+    # Validar el formulario
     if form.validate_on_submit():
+
+        # Guardar temporalmente la información de la factura
         facturas.append({
-            "id": len(facturas)+1,
+            "id": len(facturas) + 1,
             "cliente": form.cliente.data,
             "producto_id": form.producto_id.data,
             "cantidad": form.cantidad.data,
             "descuento": form.descuento.data
         })
-        flash('Factura generada', 'success')
-        return redirect(url_for('facturacion'))
-    return render_template('factura_form.html', titulo="Nueva Factura", form=form) # ERROR CORREGIDO: era facturacion.html
 
+        # Mostrar mensaje de confirmación
+        flash(
+            'Factura generada',
+            'success'
+        )
+
+        # Regresar al módulo de facturación
+        return redirect(
+            url_for('facturacion')
+        )
+
+    # Mostrar el formulario de facturación
+    return render_template(
+        'factura_form.html',
+        titulo="Nueva Factura",
+        form=form
+    )
+
+
+# Ruta para procesar información
 @app.route('/procesar', methods=['POST'])
 def procesar():
+
+    # Redirigir al formulario de contacto
     return redirect(url_for('contacto'))
 
+
 # Ejecución del servidor
-if __name__ == '__main__': 
+if __name__ == '__main__':
     app.run(debug=True)
