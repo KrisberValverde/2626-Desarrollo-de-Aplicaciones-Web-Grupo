@@ -8,9 +8,21 @@
     {% endfor %}
     {% if facturas %}
     <table class="table table-striped">
-        <tr><th>ID</th><th>Cliente</th><th>Prenda ID</th><th>Cantidad</th></th>Descuento</th></tr>
+        <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Prenda ID</th>
+            <th>Cantidad</th>
+            <th>Descuento</th>
+        </tr>
         {% for factura in facturas %}
-        <tr><td>{{ factura.id }}</td><td>{{ factura.cliente }}</td><td>{{ factura.producto_id }}</td><td>${{ factura.cantidad }}</td></th>{{ factura.descuento }}%</th></tr>
+        <tr>
+            <td>{{ factura.id }}</td>
+            <td>{{ factura.cliente }}</td>
+            <td>{{ factura.producto_id }}</td>
+            <td>{{ factura.cantidad }}</td>
+            <td>{{ factura.descuento }}%</td>
+        </tr>
         {% endfor %}
     </table>
     {% else %}

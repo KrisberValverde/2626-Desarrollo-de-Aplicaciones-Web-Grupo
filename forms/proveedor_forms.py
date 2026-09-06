@@ -18,8 +18,4 @@ class ProveedorForm(FlaskForm):
     telefono = StringField('Teléfono', validators=[
         DataRequired(message="Obligatorio")
     ])
-    direccion = StringField('Dirección', validators=[
-        DataRequired(message="Obligatorio")
-    ])
     submit = SubmitField('Guardar Proveedor')
-    
