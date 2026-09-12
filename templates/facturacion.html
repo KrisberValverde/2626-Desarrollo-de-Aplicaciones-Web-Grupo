@@ -3,27 +3,31 @@
 <div class="container">
     <h2>Facturación</h2>
     <a href="{{ url_for('nueva_factura') }}" class="btn btn-success mb-3">+ Nueva Factura</a>
-    {% for category, message in get_flashed_messages(with_categories=true) %}
-        <div class="alert alert-{{ category }}">{{ message }}</div>
-    {% endfor %}
+    
     {% if facturas %}
     <table class="table table-striped">
-        <tr>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Prenda ID</th>
-            <th>Cantidad</th>
-            <th>Descuento</th>
-        </tr>
-        {% for factura in facturas %}
-        <tr>
-            <td>{{ factura.id }}</td>
-            <td>{{ factura.cliente }}</td>
-            <td>{{ factura.producto_id }}</td>
-            <td>{{ factura.cantidad }}</td>
-            <td>{{ factura.descuento }}%</td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Total</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for factura in facturas %}
+            <tr>
+                <td>{{ factura.id_factura }}</td>
+                <td>{{ factura.cliente }}</td>
+                <td>{{ factura.producto_nombre }}</td>
+                <td>{{ factura.cantidad }}</td>
+                <td>${{ factura.total }}</td>
+                <td>{{ factura.fecha }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
     {% else %}
     <p>No hay facturas registradas.</p>

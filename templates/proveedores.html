@@ -3,14 +3,26 @@
 <div class="container">
     <h2>Proveedores</h2>
     <a href="{{ url_for('nuevo_proveedor') }}" class="btn btn-success mb-3">+ Nuevo Proveedor</a>
-    {% for category, message in get_flashed_messages(with_categories=true) %}
-        <div class="alert alert-{{ category }}">{{ message }}</div>
-    {% endfor %}
+    
     {% if proveedores %}
     <table class="table table-striped">
-        <tr><th>ID</th><th>Empresa</th><th>RUC</th><th>Email</th><th>Teléfono</th></tr>
+        <tr>
+            <th>ID</th>
+            <th>Empresa</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+        </tr>
         {% for proveedor in proveedores %}
-        <tr><td>{{ proveedor.id }}</td><td>{{ proveedor.nombre_empresa }}</td><td>{{ proveedor.ruc }}</td><td>{{ proveedor.email }}</td><td>{{ proveedor.telefono }}</td></tr>
+        <tr>
+            <!-- Usamos id_proveedor tal como en productos usabas id_producto -->
+            <td>{{ proveedor.id_proveedor }}</td>
+            <!-- Nombre -->
+            <td>{{ proveedor.nombre }}</td>
+            <!-- Correo -->
+            <td>{{ proveedor.correo }}</td>
+            <!-- Teléfono -->
+            <td>{{ proveedor.telefono }}</td>
+        </tr>
         {% endfor %}
     </table>
     {% else %}
