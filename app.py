@@ -1,12 +1,77 @@
 from flask import Flask, render_template, redirect, url_for, flash, request
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from forms import ProductoForm, ClienteForm, ContactoForm, ProveedorForm, FacturaForm
+from forms.forms import FormularioLogin, FormularioRegistro
+from models import Usuario
 from conexion.conexion import obtener_conexion
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'boutique_alison-2026-csrf-segura'
 
+# Configuración de Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'Debe iniciar sesión para acceder a esta página.'
+login_manager.login_message_category = 'warning'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Usuario.obtener_por_id(user_id)
+
 mensajes_contacto = []
 
+
+# --- RUTAS DE AUTENTICACIÓN ---
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('catalogo'))
+    
+    form = FormularioLogin()
+    if form.validate_on_submit():
+        user = Usuario.obtener_por_nombre(form.usuario.data)
+        if user and check_password_hash(user.password, form.password.data):
+            login_user(user)
+            flash('¡Inicio de sesión exitoso!', 'success')
+            siguiente = request.args.get('next')
+            return redirect(siguiente or url_for('catalogo'))
+        else:
+            flash('Usuario o contraseña incorrectos.', 'danger')
+            
+    return render_template('login.html', titulo="Iniciar Sesión", form=form)
+
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
+    form = FormularioRegistro()
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(form.password.data)
+        try:
+            conn = obtener_conexion()
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO usuarios (usuario, password) VALUES (%s, %s)", (form.usuario.data, hashed_password))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            flash('Registro exitoso. Ahora puede iniciar sesión.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            flash('El nombre de usuario ya se encuentra registrado o ocurrió un error.', 'danger')
+            
+    return render_template('registro.html', titulo="Registro de Usuario", form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Has cerrado sesión correctamente.', 'info')
+    return redirect(url_for('login'))
+
+
+# --- RUTAS PÚBLICAS ---
 
 @app.route('/')
 def index():
@@ -26,8 +91,6 @@ def index():
         categorias=categorias
     )
 
-
-# 1. Vista Pública para Clientes (SELECT)
 @app.route('/productos-servicios')
 def productos_servicios():
     conn = obtener_conexion()
@@ -42,9 +105,39 @@ def productos_servicios():
         prendas=prendas
     )
 
+@app.route('/contacto', methods=['GET', 'POST'])
+def contacto():
+    form = ContactoForm()
+    if form.validate_on_submit():
+        mensajes_contacto.append({
+            "nombre": form.nombre.data,
+            "correo": form.correo.data,
+            "mensaje": form.mensaje.data
+        })
+        flash('Mensaje enviado correctamente', 'success')
+        return render_template(
+            'respuesta.html',
+            titulo="Confirmación",
+            nombre=form.nombre.data,
+            correo=form.correo.data,
+            mensaje=form.mensaje.data
+        )
+    return render_template(
+        'contacto.html',
+        titulo="Contacto",
+        form=form
+    )
+
+@app.route('/procesar', methods=['POST'])
+def procesar():
+    return redirect(url_for('contacto'))
+
+
+# --- RUTAS PROTEGIDAS (Requieren Login) ---
 
 # 2. Panel de Administración (SELECT)
 @app.route('/catalogo')
+@login_required
 def catalogo():
     conn = obtener_conexion()
     cursor = conn.cursor(dictionary=True)
@@ -58,9 +151,9 @@ def catalogo():
         prendas=prendas
     )
 
-
 # AGREGAR (INSERT)
 @app.route('/catalogo/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo_producto():
     form = ProductoForm()
     if form.validate_on_submit():
@@ -96,9 +189,9 @@ def nuevo_producto():
         form=form
     )
 
-
-# MODIFICAR (UPDATE) - Uso de id_producto
+# MODIFICAR (UPDATE)
 @app.route('/catalogo/editar/<int:id_producto>', methods=['GET', 'POST'])
+@login_required
 def editar_producto(id_producto):
     conn = obtener_conexion()
     cursor = conn.cursor(dictionary=True)
@@ -136,9 +229,9 @@ def editar_producto(id_producto):
         form=form
     )
 
-
-# ELIMINAR (DELETE) - Uso de id_producto
+# ELIMINAR (DELETE)
 @app.route('/catalogo/eliminar/<int:id_producto>', methods=['POST', 'GET'])
+@login_required
 def eliminar_producto(id_producto):
     conn = obtener_conexion()
     cursor = conn.cursor()
@@ -149,32 +242,8 @@ def eliminar_producto(id_producto):
     flash('Prenda eliminada correctamente del catálogo', 'success')
     return redirect(url_for('catalogo'))
 
-
-@app.route('/contacto', methods=['GET', 'POST'])
-def contacto():
-    form = ContactoForm()
-    if form.validate_on_submit():
-        mensajes_contacto.append({
-            "nombre": form.nombre.data,
-            "correo": form.correo.data,
-            "mensaje": form.mensaje.data
-        })
-        flash('Mensaje enviado correctamente', 'success')
-        return render_template(
-            'respuesta.html',
-            titulo="Confirmación",
-            nombre=form.nombre.data,
-            correo=form.correo.data,
-            mensaje=form.mensaje.data
-        )
-    return render_template(
-        'contacto.html',
-        titulo="Contacto",
-        form=form
-    )
-
-
 @app.route('/proveedores')
+@login_required
 def proveedores_list():
     conn = obtener_conexion()
     cursor = conn.cursor(dictionary=True)
@@ -188,8 +257,8 @@ def proveedores_list():
         proveedores=proveedores
     )
 
-
 @app.route('/proveedores/nuevo', methods=['GET', 'POST'])
+@login_required
 def nuevo_proveedor():
     form = ProveedorForm()
     if form.validate_on_submit():
@@ -221,9 +290,8 @@ def nuevo_proveedor():
         form=form
     )
 
-
-# 1. Listar Facturas desde la Base de Datos
 @app.route('/facturacion')
+@login_required
 def facturacion():
     conn = obtener_conexion()
     cursor = conn.cursor(dictionary=True)
@@ -241,9 +309,8 @@ def facturacion():
         facturas=facturas
     )
 
-
-# 2. Registrar Nueva Factura (INSERT)
 @app.route('/facturacion/nuevo', methods=['GET', 'POST'])
+@login_required
 def nueva_factura():
     conn = obtener_conexion()
     cursor = conn.cursor(dictionary=True)
@@ -290,11 +357,6 @@ def nueva_factura():
         titulo="Nueva Factura",
         form=form
     )
-
-
-@app.route('/procesar', methods=['POST'])
-def procesar():
-    return redirect(url_for('contacto'))
 
 
 if __name__ == '__main__':
