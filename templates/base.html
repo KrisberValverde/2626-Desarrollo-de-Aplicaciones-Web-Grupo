@@ -23,6 +23,8 @@
     </header>
     
     <!-- Navegación -->
+    {% include 'components/navbar.html' %}
+
     {% if current_user.is_authenticated %}
         <span class="navbar-text me-3">
             usuario: {{ current_user.usuario}}
