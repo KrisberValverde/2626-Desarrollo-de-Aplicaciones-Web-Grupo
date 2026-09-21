@@ -23,8 +23,17 @@
     </header>
     
     <!-- Navegación -->
-    {% include 'components/navbar.html' %}
-
+    {% if current_user.is_authenticated %}
+        <span class="navbar-text me-3">
+            usuario: {{ current_user.usuario}}
+        </span>
+    {% endif %}
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">
+            Cerrar Sesión
+        </a>
+    {% endif %}
+    
     <!-- Mensajes Flash del Sistema -->
     <div class="container mt-3">
         {% with messages = get_flashed_messages(with_categories=true) %}
