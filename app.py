@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from psycopg2.extras import RealDictCursor
 
 from forms import ProductoForm, ClienteForm, ContactoForm, ProveedorForm, FacturaForm
 from forms.forms import FormularioLogin, FormularioRegistro
@@ -94,7 +95,7 @@ def index():
 @app.route('/productos-servicios')
 def productos_servicios():
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute('SELECT * FROM productos')
     prendas = cursor.fetchall()
     cursor.close()
@@ -140,7 +141,7 @@ def procesar():
 @login_required
 def catalogo():
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute('SELECT * FROM productos')
     prendas = cursor.fetchall()
     cursor.close()
@@ -194,7 +195,7 @@ def nuevo_producto():
 @login_required
 def editar_producto(id_producto):
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     
     if request.method == 'POST':
         form = ProductoForm()
@@ -246,7 +247,7 @@ def eliminar_producto(id_producto):
 @login_required
 def proveedores_list():
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute('SELECT * FROM proveedores')
     proveedores = cursor.fetchall()
     cursor.close()
@@ -294,7 +295,7 @@ def nuevo_proveedor():
 @login_required
 def facturacion():
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute('''
         SELECT f.*, p.nombre AS producto_nombre, p.precio AS producto_precio 
         FROM facturas f
@@ -313,7 +314,7 @@ def facturacion():
 @login_required
 def nueva_factura():
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute('SELECT * FROM productos')
     prendas = cursor.fetchall()
     cursor.close()
