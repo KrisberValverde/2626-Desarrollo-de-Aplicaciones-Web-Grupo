@@ -7,7 +7,7 @@
     <h2>Inicio</h2>
     <p class="lead">Bienvenidos a {{ tienda|default('Boutique Alison') }}, donde encontrarás prendas exclusivas y outfits acorde a tu personalidad y estilo único con elegancia</p>
     <div class="text-center">
-        <a href="#productos-servicios" class="btn btn-outline-danger mt-2 px-4 fw-bold">Ver Catálogo</a>
+        <a href="{{ url_for('productos_servicios') }}" class="btn text-white mt-2 px-4 fw-bold" style="background-color: #9102bd;">Ver Catálogo Completo</a>
     </div>
 </section>
 
@@ -24,83 +24,96 @@
 </section>
 
 <section id="productos-servicios" class="bg-gris p-4 rounded shadow-sm my-3">
-    <h2>Nuestros Productos</h2>
-    <ul class="row g-3 list-unstyled">
+    <h2 class="mb-4">Nuestros Productos</h2>
+    <div class="row g-3">
         {% if categorias %}
             {% for cat in categorias %}
-                <li class="col-6 col-md-4">
-                    <div class="card p-3 text-center bg-light fw-bold">{{ cat }}</div>
-                </li>
+                <div class="col-6 col-md-4">
+                    <a href="{{ url_for('productos_servicios', categoria=cat) }}" class="text-decoration-none">
+                        <div class="card p-3 text-center bg-white text-dark fw-bold shadow-sm border-0 rounded-3 btn-categoria">
+                            {{ cat }}
+                        </div>
+                    </a>
+                </div>
             {% endfor %}
         {% else %}
-            <li class="col-6 col-md-4"><div class="card p-3 text-center bg-light fw-bold">Vestidos</div></li>
-            <li class="col-6 col-md-4"><div class="card p-3 text-center bg-light fw-bold">Tops</div></li>
-            <li class="col-6 col-md-4"><div class="card p-3 text-center bg-light fw-bold">Pantalones</div></li>
-            <li class="col-6 col-md-4"><div class="card p-3 text-center bg-light fw-bold">Camisas</div></li>
-            <li class="col-6 col-md-4"><div class="card p-3 text-center bg-light fw-bold">Enterizos</div></li>
-            <li class="col-6 col-md-4"><div class="card p-3 text-center bg-light fw-bold">Faldas</div></li>
+            <!-- Enlaces directos a cada categoría filtrada -->
+            <div class="col-6 col-md-4">
+                <a href="{{ url_for('productos_servicios', categoria='Vestidos') }}" class="text-decoration-none">
+                    <div class="card p-3 text-center bg-white text-dark fw-bold shadow-sm border-0 rounded-3">Vestidos</div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4">
+                <a href="{{ url_for('productos_servicios', categoria='Tops') }}" class="text-decoration-none">
+                    <div class="card p-3 text-center bg-white text-dark fw-bold shadow-sm border-0 rounded-3">Tops</div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4">
+                <a href="{{ url_for('productos_servicios', categoria='Pantalones') }}" class="text-decoration-none">
+                    <div class="card p-3 text-center bg-white text-dark fw-bold shadow-sm border-0 rounded-3">Pantalones</div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4">
+                <a href="{{ url_for('productos_servicios', categoria='Camisas') }}" class="text-decoration-none">
+                    <div class="card p-3 text-center bg-white text-dark fw-bold shadow-sm border-0 rounded-3">Camisas</div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4">
+                <a href="{{ url_for('productos_servicios', categoria='Enterizos') }}" class="text-decoration-none">
+                    <div class="card p-3 text-center bg-white text-dark fw-bold shadow-sm border-0 rounded-3">Enterizos</div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4">
+                <a href="{{ url_for('productos_servicios', categoria='Faldas') }}" class="text-decoration-none">
+                    <div class="card p-3 text-center bg-white text-dark fw-bold shadow-sm border-0 rounded-3">Faldas</div>
+                </a>
+            </div>
         {% endif %}
-    </ul>
+    </div>
 </section>
 
-<section id="gestion-inventario" class="bg-gris p-4 rounded shadow-sm my-3">
-    <h2>Administración del Catálogo (To-Do List de Prendas)</h2>
-    <div class="row">
-        <div class="col-md-5 mb-4">
-            <div class="card p-3 bg-light shadow-sm text-start">
-                <h4 class="mb-3 text-dark fs-5">Añadir Nueva Prenda</h4>
-                
-                <div id="mensaje-alerta"></div>
-                
-                <form id="form-producto" novalidate>
-                    <div class="mb-3">
-                        <label for="prod-nombre" class="form-label small fw-bold">Nombre de la Prenda:</label>
-                        <input type="text" id="prod-nombre" class="form-control" placeholder="Ej. Vestido de Noche Negro">
-                        <div class="invalid-feedback">Por favor, ingresa un nombre (mínimo 4 caracteres).</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="prod-categoria" class="form-label small fw-bold">Categoría:</label>
-                        <select id="prod-categoria" class="form-select">
-                            <option value="">Seleccione una categoría...</option>
-                            <option value="Vestidos">Vestidos</option>
-                            <option value="Tops">Tops</option>
-                            <option value="Pantalones">Pantalones</option>
-                            <option value="Camisas">Camisas</option>
-                            <option value="Enterizos">Enterizos</option>
-                            <option value="Faldas">Faldas</option>
-                        </select>
-                        <div class="invalid-feedback">Debes seleccionar una categoría válida.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="prod-descripcion" class="form-label small fw-bold">Descripción / Detalles:</label>
-                        <textarea id="prod-descripcion" class="form-control" rows="2" placeholder="Tallas, color, tipo de tela..."></textarea>
-                        <div class="invalid-feedback">La descripción debe contener información suficiente (mínimo 10 caracteres).</div>
-                    </div>
-                    <button type="submit" class="btn btn-secondary w-100 fw-bold">Agregar al Inventario</button>
-                </form>
-            </div>
-        </div>
+<section id="prendas-destacadas" class="bg-gris p-4 rounded shadow-sm my-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Prendas Destacadas</h2>
+        <a href="{{ url_for('productos_servicios') }}" class="btn btn-sm btn-outline-dark">Ver más</a>
+    </div>
 
-        <div class="col-md-7">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4>Prendas Registradas</h4>
-                <span class="badge bg p-2 fs-6">Total: <span id="total-registros">0</span></span>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% if prendas %}
+            {% for prenda in prendas[:6] %} {# Muestra hasta 6 prendas #}
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="{{ prenda.imagen }}" class="card-img-top" alt="{{ prenda.nombre }}" style="height: 250px; object-fit: cover;">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold fs-6">{{ prenda.nombre }}</h5>
+                        <p class="text-muted small mb-1">Categoría: {{ prenda.categoria }}</p>
+                        <p class="fw-bold fs-5 text-dark mb-2">${{ "%.2f"|format(prenda.precio) }}</p>
+
+                        <!-- Formulario real conectado a Flask para añadir al Carrito -->
+                        <form action="{{ url_for('agregar_al_carrito', id_producto=prenda.id_producto) }}" method="POST" class="mt-auto">
+                            <div class="mb-2">
+                                <select name="talla" class="form-select form-select-sm" required>
+                                    <option value="" disabled selected>Seleccionar Talla...</option>
+                                    {% if prenda.stock_s and prenda.stock_s > 0 %}<option value="S">Talla S</option>{% endif %}
+                                    {% if prenda.stock_m and prenda.stock_m > 0 %}<option value="M">Talla M</option>{% endif %}
+                                    {% if prenda.stock_l and prenda.stock_l > 0 %}<option value="L">Talla L</option>{% endif %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn text-white btn-sm w-100 fw-bold" style="background-color: #9102bd;">
+                                <i class="bi bi-cart-plus me-1"></i> Añadir al Carrito
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle bg-white rounded shadow-sm overflow-hidden">
-                    <thead class="tabla">
-                        <tr>
-                            <th>Prenda</th>
-                            <th>Categoría</th>
-                            <th>Descripción</th>
-                            <th class="text-center">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lista-productos">
-                    </tbody>
-                </table>
+            {% endfor %}
+        {% else %}
+            <!-- Si no se pasan prendas desde Flask, muestra una invitación al catálogo -->
+            <div class="col-12 text-center py-4">
+                <p class="text-muted">Explora nuestro catálogo para descubrir todas las prendas disponibles.</p>
+                <a href="{{ url_for('productos_servicios') }}" class="btn btn-dark btn-sm">Ir al Catálogo</a>
             </div>
-        </div>
+        {% endif %}
     </div>
 </section>
 

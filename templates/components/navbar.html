@@ -1,35 +1,81 @@
-<nav class="navbar navbar-expand-md bg-c shadow-sm sticky-top">
-    <div class="container">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuBoutique">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-center" id="menuBoutique">
-            <ul class="navbar-nav gap-3">
-                <li class="nav-item">
-                    <a class="nav-link text-dark fw-semibold" href="{{ url_for('index') }}">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" href="{{ url_for('index') }}#quienes-somos">Quiénes Somos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" href="{{ url_for('productos_servicios') }}">Productos o Servicios</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" href="{{ url_for('contacto') }}">Contacto</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('catalogo') }}">Catálogo</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('nuevo_producto') }}">+ Prenda</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('proveedores_list') }}">Proveedores</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('facturacion') }}">Facturación</a>
-                </li>
-            </ul>
-        </div>
+<nav class="navbar navbar-expand-lg bg-c shadow-sm">
+  <div class="container">
+
+    <!-- Botón Toggle para vista celular/móvil -->  
+    <button class="navbar-toggler border-0 ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContenido">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Contenido de la Navegación centrada -->
+    <div class="collapse navbar-collapse" id="navbarContenido">
+
+      <!-- Pestañas Principales (Visibles para todos) -->
+      <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-bold">
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">Inicio</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'quienes_somos' %}active{% endif %}" href="{{ url_for('quienes_somos') }}">Quiénes Somos</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'productos_servicios' %}active{% endif %}" href="{{ url_for('productos_servicios') }}">Productos o Servicios</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'contacto' %}active{% endif %}" href="{{ url_for('contacto') }}">Contacto</a>
+        </li>
+
+        <!-- Pestaña exclusiva de ADMINISTRADOR -->
+        {% if current_user.is_authenticated and current_user.rol == 'administrador' %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-primary fw-bold" href="#" id="adminMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Panel Admin
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="adminMenu">
+            <li><a class="dropdown-item" href="{{ url_for('catalogo') }}">Gestión de Productos</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('nuevo_producto') }}">+ Añadir Prenda</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{{ url_for('proveedores_list') }}">Proveedores</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('facturacion') }}">Facturación</a></li>
+          </ul>
+        </li>
+        {% endif %}
+      </ul>
+
+      <!-- Botones de Sesión a la derecha -->
+      <ul class="navbar-nav ms-auto align-items-center">
+        {% if current_user.is_authenticated %}
+          <li class="nav-item d-flex align-items-center me-2">
+            <span class="navbar-text fw-bold text-dark me-2">Hola, {{ current_user.usuario }}</span>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-outline-danger btn-sm" href="{{ url_for('logout') }}">Cerrar Sesión</a>
+          </li>
+        {% else %}
+          <li class="nav-item me-2">
+            <a class="nav-link fw-bold text-uppercase" style="color: #9102bd; font-size: 0.85rem;" href="{{ url_for('login') }}">
+              Iniciar Sesión
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-sm text-white fw-bold text-uppercase px-3" style="background-color: #9102bd; border-radius: 20px; font-size: 0.85rem;" href="{{ url_for('registro') }}">
+              Registrarse
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+
+      <!-- Botón del Carrito con enlace directo a la página de carrito y contador Jinja2 -->
+      <div class="ms-3">
+        <a href="{{ url_for('ver_carrito') }}" class="btn btn-light btn-sm position-relative border">
+          <i class="bi bi-bag-fill text-dark"></i>
+          {% if session.get('carrito') %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              {{ session['carrito']|length }}
+            </span>
+          {% endif %}
+        </a>
+      </div>
+
     </div>
+  </div>
 </nav>

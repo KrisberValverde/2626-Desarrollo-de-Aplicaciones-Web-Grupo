@@ -24,6 +24,27 @@
         {{ form.descuento(class="form-control" + (" is-invalid" if form.descuento.errors else "")) }}
         {% for e in form.descuento.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
     </div>
+
+    <!-- SECCIÓN DE PAGO ÚNICO POR TRANSFERENCIA / DEUNA QR -->
+    <div class="card p-3 bg-light mb-3 text-center border shadow-sm">
+        <h6 class="text-primary fw-bold mb-1">Método de Pago: Transferencia QR (Deuna)</h6>
+        <p class="small text-muted mb-2">Escanea el código QR desde tu app bancaria para realizar el pago e ingresa el comprobante para validar tu pedido.</p>
+        
+        <!-- Imagen del QR -->
+        <div class="my-2">
+            <img src="{{ url_for('static', filename='img/qr_deuna.png') }}" alt="Código QR Deuna" class="img-fluid rounded border shadow-sm" style="max-width: 170px;">
+        </div>
+        
+        <p class="small fw-bold mb-2">Titular: Boutique Alison</p>
+
+        <!-- Campo obligatorio para el número de comprobante -->
+        <div class="text-start mt-2">
+            <label for="num_comprobante" class="form-label small fw-bold">Número de Comprobante / Referencia de Pago:</label>
+            <input type="text" name="num_comprobante" id="num_comprobante" class="form-control" placeholder="Ej. 849201" required>
+            <div class="form-text small">Ingresa la referencia de tu transferencia para validar el pago antes del envío.</div>
+        </div>
+    </div>
+    
     {{ form.submit(class="btn btn-primary") }}
     <a href="{{ url_for('facturacion') }}" class="btn btn-secondary">Cancelar</a>
     </form>

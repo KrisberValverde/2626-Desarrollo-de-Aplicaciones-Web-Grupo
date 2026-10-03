@@ -13,6 +13,7 @@
                 <th>Producto</th>
                 <th>Cantidad</th>
                 <th>Total</th>
+                <th>Comprobante / Ref.</th>
                 <th>Fecha</th>
             </tr>
         </thead>
@@ -24,6 +25,10 @@
                 <td>{{ factura.producto_nombre }}</td>
                 <td>{{ factura.cantidad }}</td>
                 <td>${{ factura.total }}</td>
+                <td>
+                    <span class="badge bg-info text-dark">
+                        {{ factura.num_comprobante|default('Sin Ref.') }}
+                    </span></td>
                 <td>{{ factura.fecha }}</td>
             </tr>
             {% endfor %}

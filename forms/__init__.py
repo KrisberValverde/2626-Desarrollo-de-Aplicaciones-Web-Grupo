@@ -21,4 +21,3 @@ class ContactoForm(FlaskForm):
         Length(min=10, message="Mínimo 10 caracteres")
     ])
     submit = SubmitField('Enviar Mensaje')
-
