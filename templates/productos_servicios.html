@@ -27,8 +27,12 @@
         {% for prenda in prendas %}
         <div class="col">
             <div class="card h-100 shadow-sm border-0 rounded-3">
+                {% if prenda.imagen and prenda.imagen.startswith('http') %}
                 <img src="{{ prenda.imagen }}" class="card-img-top" alt="{{ prenda.nombre }}" style="height: 280px; object-fit: cover; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;">
-                
+                {% else %}
+                    <img src="{{ url_for('static', filename='img/' ~ prenda.imagen) }}" class="card-img-top" alt="{{ prenda.nombre }}" style="height: 280px; object-fit: cover; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;">
+                {% endif %}
+
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title fw-bold text-dark">{{ prenda.nombre }}</h5>
                     <p class="text-muted small mb-1">Categoría: <span class="badge bg-light text-dark border">{{ prenda.categoria }}</span></p>
@@ -36,8 +40,8 @@
 
                     <!-- Formulario para Seleccionar Talla y Agregar al Carrito -->
                     <form action="{{ url_for('agregar_al_carrito', id_producto=prenda.id_producto) }}" method="POST" class="mt-auto">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-secondary">Selecciona Talla:</label>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-secondary mb-1">Selecciona Talla:</label>
                             <select name="talla" class="form-select form-select-sm" required>
                                 <option value="" disabled selected>Elegir talla...</option>
                                 {% if prenda.stock_s and prenda.stock_s > 0 %}
@@ -51,8 +55,14 @@
                                 {% endif %}
                             </select>
                         </div>
-                        
-                        <button type="submit" class="btn btn-dark btn-sm w-100">
+
+                        <!-- Campo de Cantidad -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary mb-1">Cantidad:</label>
+                            <input type="number" name="cantidad" value="1" min="1" max="10" class="form-control form-control-sm text-center" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-dark btn-sm w-100 fw-bold">
                             <i class="bi bi-cart-plus me-1"></i> Agregar al Carrito
                         </button>
                     </form>

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, DecimalField, IntegerField, SelectField, SubmitField
-from wtforms.validators import DataRequired, NumberRange, URL
+from wtforms.validators import DataRequired, NumberRange
 
 class ProductoForm(FlaskForm):
     nombre = StringField('Nombre del Producto', validators=[DataRequired()])
@@ -20,5 +20,6 @@ class ProductoForm(FlaskForm):
     stock_s = IntegerField('Stock Talla S', default=0, validators=[NumberRange(min=0)])
     stock_m = IntegerField('Stock Talla M', default=0, validators=[NumberRange(min=0)])
     stock_l = IntegerField('Stock Talla L', default=0, validators=[NumberRange(min=0)])
-    imagen = StringField('URL de la Imagen', validators=[DataRequired(), URL()])
+
+    imagen = StringField('URL de la Imagen', validators=[DataRequired()])
     submit = SubmitField('Guardar Producto')

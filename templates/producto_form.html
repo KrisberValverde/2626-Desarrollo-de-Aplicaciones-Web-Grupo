@@ -1,29 +1,81 @@
-from flask_wtf import FlaskForm
-from wtforms import StringField, DecimalField, IntegerField, SelectField, SubmitField
-from wtforms.validators import DataRequired, NumberRange, URL
+{% extends "base.html" %}
 
-class ProductoForm(FlaskForm):
-    nombre = StringField('Nombre del Producto', validators=[DataRequired()])
-    categoria = SelectField(
-        'Categoría',
-        choices=[
-            ('Vestidos', 'Vestidos'),
-            ('Tops', 'Tops'),
-            ('Pantalones', 'Pantalones'),
-            ('Camisas', 'Camisas'),
-            ('Enterizos', 'Enterizos'),
-            ('Faldas', 'Faldas'),
-            ('Abrigos', 'Abrigos'),
-            ('Accesorios', 'Accesorios')
-        ],
-        validators=[DataRequired()]
-    )
-    precio = DecimalField('Precio ($)', validators=[DataRequired(), NumberRange(min=0.01)])
-    
-    # Cantidades de stock por talla (Mínimo 0)
-    stock_s = IntegerField('Stock Talla S', default=0, validators=[NumberRange(min=0)])
-    stock_m = IntegerField('Stock Talla M', default=0, validators=[NumberRange(min=0)])
-    stock_l = IntegerField('Stock Talla L', default=0, validators=[NumberRange(min=0)])
-    
-    imagen = StringField('URL de la Imagen', validators=[DataRequired(), URL()])
-    submit = SubmitField('Guardar Producto')
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h4 class="fw-bold mb-0 text-dark">{{ titulo }}</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <!-- Nombre -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre del Producto</label>
+                            {{ form.nombre(class="form-control" + (" is-invalid" if form.nombre.errors else "")) }}
+                            {% for error in form.nombre.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Categoría y Precio -->
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label fw-bold">Categoría</label>
+                                {{ form.categoria(class="form-select" + (" is-invalid" if form.categoria.errors else "")) }}
+                                {% for error in form.categoria.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Precio ($)</label>
+                                {{ form.precio(class="form-control" + (" is-invalid" if form.precio.errors else "")) }}
+                                {% for error in form.precio.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Inventario por Tallas (S, M, L) -->
+                        <div class="card bg-light p-3 mb-3 border-0">
+                            <label class="form-label fw-bold mb-2">Stock por Tallas</label>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <label class="small text-muted fw-bold">Talla S</label>
+                                    {{ form.stock_s(class="form-control form-control-sm") }}
+                                </div>
+                                <div class="col-4">
+                                    <label class="small text-muted fw-bold">Talla M</label>
+                                    {{ form.stock_m(class="form-control form-control-sm") }}
+                                </div>
+                                <div class="col-4">
+                                    <label class="small text-muted fw-bold">Talla L</label>
+                                    {{ form.stock_l(class="form-control form-control-sm") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- URL de Imagen -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">URL de la Imagen</label>
+                            {{ form.imagen(class="form-control" + (" is-invalid" if form.imagen.errors else "")) }}
+                            {% for error in form.imagen.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('catalogo') }}" class="btn btn-outline-secondary">Cancelar</a>
+                            {{ form.submit(class="btn text-white fw-bold px-4", style="background-color: #9102bd;") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

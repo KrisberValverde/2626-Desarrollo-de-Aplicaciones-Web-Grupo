@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from psycopg2.extras import RealDictCursor
@@ -272,6 +272,7 @@ def eliminar_producto(id_producto):
 @app.route('/agregar_al_carrito/<int:id_producto>', methods=['POST'])
 def agregar_al_carrito(id_producto):
     talla = request.form.get('talla')
+    cantidad = int(request.form.get('cantidad', 1))
     
     if not talla:
         flash('Debes seleccionar una talla antes de agregar al carrito.', 'warning')
@@ -297,7 +298,7 @@ def agregar_al_carrito(id_producto):
     existente = False
     for item in carrito:
         if item['id_producto'] == id_producto and item['talla'] == talla:
-            item['cantidad'] += 1
+            item['cantidad'] += cantidad
             existente = True
             break
             
@@ -308,10 +309,10 @@ def agregar_al_carrito(id_producto):
             'precio': float(producto['precio']),
             'imagen': producto['imagen'],
             'talla': talla,
-            'cantidad': 1,
-            'stock_s': producto['stock_s'],
-            'stock_m': producto['stock_m'],
-            'stock_l': producto['stock_l']
+            'cantidad': cantidad,
+            'stock_s': producto['stock_s'] or 0,
+            'stock_m': producto['stock_m'] or 0,
+            'stock_l': producto['stock_l'] or 0
         })
         
     session.modified = True
@@ -321,8 +322,22 @@ def agregar_al_carrito(id_producto):
 @app.route('/carrito')
 def ver_carrito():
     carrito = session.get('carrito', [])
+    
     subtotal = sum(item['precio'] * item['cantidad'] for item in carrito)
-    return render_template('carrito.html', carrito=carrito, subtotal=subtotal)
+    
+    # Regla de negocio: Envío gratis a partir de $50, si es menor cobra $5.00
+    if subtotal >= 50 or subtotal == 0:
+        costo_envio = 0.0
+    else:
+        costo_envio = 5.0
+        
+    total = subtotal + costo_envio
+    
+    return render_template('carrito.html', 
+                           carrito=carrito, 
+                           subtotal=subtotal, 
+                           costo_envio=costo_envio, 
+                           total=total)
 
 @app.route('/eliminar_del_carrito/<int:indice>')
 def eliminar_del_carrito(indice):
@@ -416,53 +431,71 @@ def facturacion():
     )
 
 @app.route('/facturacion/nuevo', methods=['GET', 'POST'])
-@login_required
 def nueva_factura():
-    conn = obtener_conexion()
-    cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute('SELECT * FROM productos')
-    prendas = cursor.fetchall()
-    cursor.close()
-    conn.close()
+    carrito = session.get('carrito', [])
     
-    form = FacturaForm()
-    form.producto_id.choices = [
-        (p['id_producto'], f"{p['nombre']} - ${p['precio']}")
-        for p in prendas
-    ]
-    
-    if form.validate_on_submit():
+    # 1. Si el carrito está vacío, no se puede facturar
+    if not carrito:
+        flash('Tu carrito está vacío. Agrega productos antes de facturar.', 'warning')
+        return redirect(url_for('productos_servicios'))
+        
+    # 2. Calcular Totales Automáticamente desde el Carrito
+    subtotal = sum(float(item['precio']) * int(item['cantidad']) for item in carrito)
+    costo_envio = 0.0 if subtotal >= 50 or subtotal == 0 else 5.0
+    total = subtotal + costo_envio
+
+    if request.method == 'POST':
+        nombre_cliente = request.form.get('cliente')
+        comprobante = request.form.get('comprobante')
+        
         conn = obtener_conexion()
-        # Se reemplaza dictionary=True por RealDictCursor
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute('SELECT precio FROM productos WHERE id_producto = %s', (form.producto_id.data,))
-        producto = cursor.fetchone()
         
-        precio_unitario = float(producto['precio']) if producto else 0.0
-        cantidad = int(form.cantidad.data)
-        total = precio_unitario * cantidad
-        
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO facturas (cliente, id_producto, cantidad, total)
-            VALUES (%s, %s, %s, %s)
-        ''', (
-            form.cliente.data,
-            form.producto_id.data,
-            cantidad,
-            total
-        ))
-        conn.commit()
-        cursor.close()
-        conn.close()
-        
-        flash('Factura generada y registrada correctamente en la base de datos', 'success')
-        return redirect(url_for('facturacion'))
-        
+        try:
+            # Insertar cada producto del carrito como un registro en la tabla facturas
+            # y descontar el stock según la talla elegida
+            for item in carrito:
+                cursor.execute('''
+                    INSERT INTO facturas (cliente, id_producto, cantidad, total)
+                    VALUES (%s, %s, %s, %s)
+                ''', (
+                    nombre_cliente,
+                    item['id_producto'],
+                    item['cantidad'],
+                    float(item['precio']) * int(item['cantidad'])
+                ))
+                
+                # Descontar stock dinámicamente según la talla elegida (stock_s, stock_m, stock_l)
+                talla = str(item.get('talla', 's')).lower()
+                columna_stock = f"stock_{talla}" if talla in ['s', 'm', 'l'] else "stock_s"
+                
+                cursor.execute(f'''
+                    UPDATE productos 
+                    SET {columna_stock} = GREATEST(0, {columna_stock} - %s)
+                    WHERE id_producto = %s
+                ''', (item['cantidad'], item['id_producto']))
+            
+            conn.commit()
+            
+            # Limpiar carrito de compras tras éxito
+            session.pop('carrito', None)
+            flash('¡Factura y pedido registrados con éxito!', 'success')
+            return redirect(url_for('facturacion'))
+            
+        except Exception as e:
+            conn.rollback()
+            flash(f'Ocurrió un error al procesar la factura: {e}', 'danger')
+        finally:
+            cursor.close()
+            conn.close()
+
     return render_template(
         'factura_form.html',
         titulo="Nueva Factura",
-        form=form
+        carrito=carrito,
+        subtotal=subtotal,
+        costo_envio=costo_envio,
+        total=total
     )
 
 if __name__ == '__main__':
