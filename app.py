@@ -37,13 +37,6 @@ def login():
     if form.validate_on_submit():
         usuario_ingresado = form.usuario.data.strip()
         password_ingresada = form.password.data.strip()
-        
-        # ATANJO DE SEGURIDAD PARA ADMIN (Manejado por Python)
-        if usuario_ingresado.lower() == 'admin' and password_ingresada == 'admin123':
-            admin_user = Usuario(1, 'admin', '', 'administrador')
-            login_user(admin_user)
-            flash('¡Bienvenido Administrador!', 'success')
-            return redirect(url_for('catalogo'))
 
         # Lógica normal de base de datos para otros usuarios (clientes)
         user = Usuario.obtener_por_nombre(usuario_ingresado)
